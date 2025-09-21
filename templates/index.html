@@ -6,37 +6,289 @@
 <title>উইকি নিবন্ধের শব্দ গণক</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
 <style>
+/* ---------- Theme Variables ---------- */
 :root {
-  --bg:#0d1117; --card:#0f1720; --muted:#8b949e; --text:#c9d1d9;
-  --accent:#58a6ff; --success:#2ea043; --danger:#f85149; --glass:rgba(255,255,255,0.03);
+  --bg: #0d1117;
+  --card: #0f1720;
+  --muted: #8b949e;
+  --text: #c9d1d9;
+  --accent: #58a6ff;
+  --btnText: #041024;
+  --btnWarnText: #fff;
+  --success: #2ea043;
+  --danger: #f85149;
+  --glass: rgba(255,255,255,0.03);
+  --cardGradientStart: rgba(255,255,255,0.02);
+  --inputBorder: rgba(255,255,255,0.03);
 }
-#fountainCode{ border: 1px solid;}
-body{font-family:'Noto Serif Bengali',serif;background:var(--bg);color:var(--text);margin:0;padding:28px;display:flex;justify-content:center}
-.container{width:100%;max-width:1100px}
-.header{display:flex;flex-direction: column;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
-.title{font-size:1.4rem;color:var(--accent);margin:0}
-.controls{display:flex;flex-direction:column;gap:8px;align-items:center;flex-wrap:wrap;}
-.controls .buttons{display:flex;flex-direction:row;gap:8px;}
-input[type="text"]{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:10px 12px;border-radius:8px;color:var(--text);min-width:240px}
-.btn{background:var(--accent);color:#041024;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px}
-.btn.warn{background:var(--danger);color:#fff}
-.copy-btn{background:#21262d;color:var(--text);padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;align-items:center;gap:6px}
-.progress-wrap{height:8px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden;margin:14px 0;display:none}
-.progress{height:100%;width:0%;background:var(--success);transition:width .22s}
-.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:14px;margin-top:12px}
-.table-wrap{overflow:auto;margin-top:12px}
-table{width:100%;border-collapse:collapse;min-width:700px}
-th,td{padding:10px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.95rem}
-th{color:var(--muted);font-weight:700;background:transparent}
-td.left{text-align:left;padding-left:14px}
-.total-row td{font-weight:700;color:var(--accent);border-top:1px solid rgba(255,255,255,0.04)}
-.small{font-size:0.86rem;color:var(--muted)}
-.error{color:var(--danger);margin-top:10px}
-.hidden{display:none;}
-@media(max-width:820px){table{min-width:600px}input[type="text"]{min-width:140px}}
+
+/* ---------- Light Mode Variables ---------- */
+body.light {
+  --bg: #f6f8fa;
+  --card: #ffffff;
+  --muted: #57606a;
+  --text: #111;
+  --accent: #0969da;
+  --btnText: #fff;
+  --btnWarnText: #fff;
+  --success: #2ea043;
+  --danger: #d92f2f;
+  --glass: rgba(0,0,0,0.03);
+  --cardGradientStart: rgba(0,0,0,0.03);
+  --inputBorder: rgba(0,0,0,0.1);
+}
+
+/* ---------- Global Styles ---------- */
+body {
+  font-family: 'Noto Serif Bengali', serif;
+  background: var(--bg);
+  color: var(--text);
+  margin: 0;
+  padding: 20px;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+  transition: background 0.3s, color 0.3s;
+}
+
+.container {
+  width: 100%;
+  max-width: 1100px;
+  padding: 0 10px;
+}
+
+.header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  align-items: center;
+  margin-bottom: 18px;
+  flex-wrap: wrap;
+}
+
+.title {
+  font-size: 1.5rem;
+  color: var(--accent);
+  margin: 0;
+  text-align: center;
+}
+
+.controls {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  align-items: center;
+  width: 100%;
+}
+
+.controls .buttons {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+  width: 100%;
+}
+
+input[type="text"] {
+  background: var(--card);
+  border: 1px solid var(--inputBorder);
+  padding: 10px 12px;
+  border-radius: 8px;
+  color: var(--text);
+  width: 100%;
+  max-width: 400px;
+  box-sizing: border-box;
+}
+
+.btn, .btn.warn {
+  flex: 1;
+  min-width: 150px;
+  max-width: 200px;
+  text-align: center;
+}
+
+.btn {
+  background: var(--accent);
+  color: var(--btnText);
+  border: none;
+  padding: 10px 12px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+}
+
+.btn:hover { opacity: 0.85; }
+
+.btn.warn {
+  background: var(--danger);
+  color: var(--btnWarnText);
+}
+
+.copy-btn {
+  background: var(--card);
+  color: var(--text);
+  padding: 6px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--glass);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  transition: opacity 0.2s;
+  flex-wrap: wrap;
+}
+
+.copy-btn:hover { opacity: 0.85; }
+
+.progress-wrap {
+  height: 8px;
+  background: var(--glass);
+  border-radius: 999px;
+  overflow: hidden;
+  margin: 14px auto;      /* center horizontally */
+  display: none;
+  max-width: 600px;       /* optional: limit width on very large screens */
+}
+
+.progress {
+  height: 100%;
+  width: 0%;
+  background: var(--success);
+  transition: width 0.22s;
+}
+
+
+.card {
+  background: linear-gradient(180deg, var(--cardGradientStart), transparent);
+  border: 1px solid var(--glass);
+  border-radius: 12px;
+  padding: 14px;
+  margin-top: 12px;
+  width: 100%;
+  overflow-x: auto;
+}
+
+.table-wrap {
+  overflow-x: auto;       /* enable horizontal scrolling */
+  overflow-y: hidden;     /* hide vertical scroll */
+  margin-top: 12px;
+  -webkit-overflow-scrolling: touch; /* smooth scroll on mobile */
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 700px;      /* ensures table doesn’t shrink too much */
+  table-layout: fixed;   /* optional: keeps column widths consistent */
+}
+
+th, td {
+  padding: 10px 12px;
+  text-align: center;
+  border-bottom: 1px solid var(--glass);
+  font-size: 0.95rem;
+  white-space: nowrap;   /* prevent wrapping */
+}
+
+th {
+  color: var(--muted);
+  font-weight: 700;
+  background: transparent;
+}
+
+td.left {
+  text-align: left;
+  padding-left: 12px;
+}
+
+.total-row td {
+  font-weight: 700;
+  color: var(--accent);
+  border-top: 1px solid var(--glass);
+}
+
+.small {
+  font-size: 0.86rem;
+  color: var(--muted);
+}
+
+.error {
+  color: var(--danger);
+  margin-top: 10px;
+}
+
+.hidden { display: none; }
+.input-label {
+  display: block;
+  max-width: 100%;
+  word-break: break-word; /* allow long URLs or text to wrap */
+  font-size: 1rem;
+  text-align: center;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+@media(max-width: 820px) {
+  .input-label { 
+    font-size: 0.9rem; 
+    text-align: left; 
+  }
+}
+
+@media(max-width: 480px) {
+  .input-label { 
+    font-size: 0.85rem; 
+    text-align: left; 
+  }
+}
+#fountainCode{border: 1px solid;}
+/* ---------- Theme toggle button ---------- */
+#themeToggle {
+  position: fixed;
+  top: 10px;
+  right: 10px;
+  padding: 8px 12px;
+  background: var(--accent);
+  color: var(--btnText);
+  border: none;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 700;
+  z-index: 999;
+  transition: opacity 0.2s;
+}
+
+#themeToggle:hover { opacity: 0.85; }
+
+/* ---------- Responsive Styles ---------- */
+@media(max-width: 1024px) {
+  .title { font-size: 1.3rem; }
+}
+
+@media(max-width: 820px) {
+  input[type="text"] { max-width: 100%; }
+  .btn, .btn.warn { min-width: 120px; max-width: 100%; }
+  table { min-width: 300px; font-size: 0.9rem; }
+}
+
+@media(max-width: 480px) {
+  .title { font-size: 1.1rem; }
+  th, td { padding: 6px 8px; font-size: 0.85rem; }
+  .controls .buttons { flex-direction: column; }
+}
 </style>
+
+
 </head>
 <body>
+<button id="themeToggle">🌙 / ☀️</button>
+
 <div class="container">
   <div class="header">
     <h1 class="title">উইকি নিবন্ধের শব্দ গণক</h1>
@@ -78,210 +330,229 @@ td.left{text-align:left;padding-left:14px}
 </div>
 
 <script>
-const MAX_CONCURRENT = 500;
-const fountainEndpoint = '/fetch_articles';
-const juryEndpoint = '/jury_stats';
+document.addEventListener('DOMContentLoaded', () => {
 
-let mode = 'word';
+  /* ---------- Theme toggle ---------- */
+  const themeToggle = document.getElementById('themeToggle');
+  const userPref = localStorage.getItem('theme');
 
-const fountainInput = document.getElementById('fountainCode');
-const countBtn = document.getElementById('countBtn');
-const juryBtn  = document.getElementById('juryBtn');
-const progressWrap = document.getElementById('progressWrap');
-const progressBar  = document.getElementById('progressBar');
-const resultCard = document.getElementById('resultCard');
-const tableWrap = document.getElementById('tableWrap');
-const summaryEl = document.getElementById('summary');
-const copyWikiBtn = document.getElementById('copyWikiBtn');
-const juryCard = document.getElementById('juryCard');
-const juryParsedWrap = document.getElementById('juryParsedWrap');
-const copyJuryBtn = document.getElementById('copyJuryBtn');
-const errorEl = document.getElementById('error');
+  // Apply saved theme or default dark
+  if(userPref === 'light') document.body.classList.add('light');
+  updateToggleText();
 
-let currentWikitable = '';
-let currentJuryWikitable = '';
+  themeToggle.onclick = () => {
+    document.body.classList.toggle('light');
+    localStorage.setItem('theme', document.body.classList.contains('light') ? 'light' : 'dark');
+    updateToggleText();
+  };
 
-function showError(msg){ errorEl.textContent = msg; errorEl.classList.remove('hidden'); }
-function hideError(){ errorEl.textContent = ''; errorEl.classList.add('hidden'); }
-function showProgress(){ progressWrap.style.display='block'; progressBar.style.width='0%'; }
-function hideProgress(){ progressWrap.style.display='none'; progressBar.style.width='0%'; }
-function setProgress(p){ progressBar.style.width = `${p}%`; }
+  function updateToggleText() {
+    themeToggle.textContent = document.body.classList.contains('light') ? '🌙' : '☀️';
+  }
 
-const toBn = n => String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
-const formatBn = n => { try { return Number(n).toLocaleString('bn-BD'); } catch { return toBn(n); } };
-const escapeHtml = s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  /* ---------- Main JS ---------- */
+  const MAX_CONCURRENT = 500;
+  const fountainEndpoint = '/fetch_articles';
+  const juryEndpoint = '/jury_stats';
 
-countBtn.addEventListener('click', ()=>runMode('word'));
-juryBtn.addEventListener('click', ()=>runMode('review'));
+  const fountainInput = document.getElementById('fountainCode');
+  const countBtn = document.getElementById('countBtn');
+  const juryBtn  = document.getElementById('juryBtn');
+  const progressWrap = document.getElementById('progressWrap');
+  const progressBar  = document.getElementById('progressBar');
+  const resultCard = document.getElementById('resultCard');
+  const tableWrap = document.getElementById('tableWrap');
+  const summaryEl = document.getElementById('summary');
+  const copyWikiBtn = document.getElementById('copyWikiBtn');
+  const juryCard = document.getElementById('juryCard');
+  const juryParsedWrap = document.getElementById('juryParsedWrap');
+  const copyJuryBtn = document.getElementById('copyJuryBtn');
+  const errorEl = document.getElementById('error');
 
-async function runMode(selectedMode){
-  hideError();
-  resultCard.classList.add('hidden');
-  juryCard.classList.add('hidden');
-  tableWrap.innerHTML=''; summaryEl.textContent='';
-  juryParsedWrap.innerHTML='';
-  currentWikitable=''; currentJuryWikitable='';
-  const code = fountainInput.value.trim();
-  if(!code){ showError('দয়া করে ফাউন্টেন কোড লিখুন।'); return; }
-  if(selectedMode==='word') await loadArticleWordCounts(code);
-  else await loadJuryStats(code);
-}
+  let currentWikitable = '';
+  let currentJuryWikitable = '';
 
-/* ---------- Article word count ---------- */
-async function loadArticleWordCounts(code){
-  countBtn.disabled=juryBtn.disabled=true;
-  showProgress();
-  try{
-    const resp = await fetch(fountainEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
-    const body = await resp.json();
-    if(body.error) throw new Error(body.error);
-    const rawArticles = body.articles || {};
-    const siteUrl = body.site_url || 'bn.wikipedia.org';
-    const tasks = [];
-    for(const user in rawArticles){
-      const arr = rawArticles[user];
-      for(const a of arr){
-        const title = a.name || '';
-        const status = a.status || 'অসম্পূর্ণ';
-        const reviews = a.reviews || 0;
-        if(title) tasks.push({user,title,status,reviews});
-      }
-    }
-    if(tasks.length===0){ showError('কোনো নিবন্ধ পাওয়া যায়নি।'); hideProgress(); return; }
-    await countArticleWords(tasks,siteUrl);
-  }catch(e){ showError('ডেটা আনতে ব্যর্থ: '+e.message); hideProgress(); }
-  finally{ countBtn.disabled=juryBtn.disabled=false; }
-}
+  /* ---------- Helpers ---------- */
+  function showError(msg) { errorEl.textContent = msg; errorEl.classList.remove('hidden'); }
+  function hideError() { errorEl.textContent = ''; errorEl.classList.add('hidden'); }
+  function showProgress() { progressWrap.style.display='block'; progressBar.style.width='0%'; }
+  function hideProgress() { progressWrap.style.display='none'; progressBar.style.width='0%'; }
+  function setProgress(p) { progressBar.style.width = `${p}%`; }
 
-async function countArticleWords(tasks, siteUrl){
-  const totals={};
-  for(const t of tasks) if(!totals[t.user]) totals[t.user]={accepted:0,unreviewed:0,rejected:0,total:0,reviews:0};
-  let idx=0,done=0;
-  setProgress(0); showProgress();
+  const toBn = n => String(n).replace(/\d/g, d => "০১২৩৪৫৬৭৮৯"[d]);
+  const formatBn = n => { try { return Number(n).toLocaleString('bn-BD'); } catch { return toBn(n); } };
+  const escapeHtml = s => String(s || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 
-  async function nextTask(){ if(idx>=tasks.length) return null; return tasks[idx++]; }
-  async function fetchOne(task) {
-    const url = `https://${siteUrl}/w/api.php?action=parse&page=${encodeURIComponent(task.title)}&format=json&prop=text&origin=*`;
+  /* ---------- Event listeners ---------- */
+  countBtn.addEventListener('click', () => runMode('word'));
+  juryBtn.addEventListener('click', () => runMode('review'));
+
+  /* ---------- Run mode ---------- */
+  async function runMode(selectedMode) {
+    hideError();
+    resultCard.classList.add('hidden');
+    juryCard.classList.add('hidden');
+    tableWrap.innerHTML = ''; summaryEl.textContent = '';
+    juryParsedWrap.innerHTML = '';
+    currentWikitable = ''; currentJuryWikitable = '';
+    const code = fountainInput.value.trim();
+    if(!code) { showError('দয়া করে ফাউন্টেন কোড লিখুন।'); return; }
+    if(selectedMode === 'word') await loadArticleWordCounts(code);
+    else await loadJuryStats(code);
+  }
+
+  /* ---------- Article Word Count ---------- */
+  async function loadArticleWordCounts(code) {
+    countBtn.disabled = juryBtn.disabled = true;
+    showProgress();
     try {
+      const resp = await fetch(fountainEndpoint, {
+        method: 'POST',
+        headers: {'Content-Type':'application/json'},
+        body: JSON.stringify({code})
+      });
+      const body = await resp.json();
+      if(body.error) throw new Error(body.error);
+
+      const rawArticles = body.articles || {};
+      const siteUrl = body.site_url || 'bn.wikipedia.org';
+      const tasks = [];
+
+      for(const user in rawArticles) {
+        const arr = rawArticles[user];
+        for(const a of arr){
+          const title = a.name || '';
+          const status = a.status || 'অসম্পূর্ণ';
+          const reviews = a.reviews || 0;
+          if(title) tasks.push({user, title, status, reviews});
+        }
+      }
+
+      if(tasks.length === 0) { showError('কোনো নিবন্ধ পাওয়া যায়নি।'); hideProgress(); return; }
+      await countArticleWords(tasks, siteUrl);
+
+    } catch(e) { showError('ডেটা আনতে ব্যর্থ: '+e.message); hideProgress(); }
+    finally { countBtn.disabled = juryBtn.disabled = false; }
+  }
+
+  async function countArticleWords(tasks, siteUrl) {
+    const totals = {};
+    for(const t of tasks) if(!totals[t.user]) totals[t.user] = {accepted:0, unreviewed:0, rejected:0, total:0, reviews:0};
+
+    let idx=0, done=0;
+    setProgress(0); showProgress();
+
+    async function nextTask() { if(idx>=tasks.length) return null; return tasks[idx++]; }
+
+    async function fetchOne(task) {
+      const url = `https://${siteUrl}/w/api.php?action=parse&page=${encodeURIComponent(task.title)}&format=json&prop=text&origin=*`;
+      try {
         const res = await fetch(url);
         const j = await res.json();
-        if (j.error) throw new Error('Page not found');
+        if(j.error) throw new Error('Page not found');
 
         const htmlContent = j.parse.text['*'] || '';
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
 
         const unwanted = [
-            '.mw-empty-elt','.mw-editsection','.reference','.references',
-            '.reflist','.mbox-small','.ambox','.navbox','.catlinks',
-            '.noprint','.metadata','.portal','style','script','.thumbinner',
-            '.listing-lastedit'
+          '.mw-empty-elt','.mw-editsection','.reference','.references',
+          '.reflist','.mbox-small','.ambox','.navbox','.catlinks',
+          '.noprint','.metadata','.portal','style','script','.thumbinner',
+          '.listing-lastedit'
         ].join(',');
-        tempDiv.querySelectorAll(unwanted).forEach(e => e.remove());
+        tempDiv.querySelectorAll(unwanted).forEach(e=>e.remove());
 
         const content = tempDiv.textContent || '';
         let words;
-        if (siteUrl.startsWith('bn.')) {
-            words = (content.match(/[\u0980-\u09FF]+/g) || []).length;
-        } else {
-            words = content.split(/\s+/).filter(w => w.length > 0).length;
-        }
+        if(siteUrl.startsWith('bn.')) words = (content.match(/[\u0980-\u09FF]+/g)||[]).length;
+        else words = content.split(/\s+/).filter(w=>w.length>0).length;
 
         totals[task.user].total += words;
-        if (task.status === 'গৃহীত হয়েছে') totals[task.user].accepted += words;
-        else if (task.status === 'গৃহীত হয়নি') totals[task.user].rejected += words;
+        if(task.status === 'গৃহীত হয়েছে') totals[task.user].accepted += words;
+        else if(task.status === 'গৃহীত হয়নি') totals[task.user].rejected += words;
         else totals[task.user].unreviewed += words;
         totals[task.user].reviews += (task.reviews || 0);
 
-    } catch (e) {
-        totals[task.user].reviews += (task.reviews || 0);
-    } finally {
-        done++;
-        setProgress(Math.round((done / tasks.length) * 100));
+      } catch(e) { totals[task.user].reviews += (task.reviews || 0); }
+      finally { done++; setProgress(Math.round((done / tasks.length)*100)); }
     }
-  }
 
-  const concurrency=Math.min(MAX_CONCURRENT,tasks.length||1);
-  const workers=Array.from({length:concurrency},async()=>{
-    while(true){ const t=await nextTask(); if(!t) break; await fetchOne(t); }
-  });
-  await Promise.all(workers);
-  hideProgress();
-  renderArticleTable(totals);
-}
-
-function renderArticleTable(totals){
-  const keys=Object.keys(totals);
-  if(keys.length===0){ resultCard.classList.add('hidden'); return; }
-
-  resultCard.classList.remove('hidden');
-  const rows=Object.entries(totals).map(([user,v])=>({user,...v})).sort((a,b)=>b.accepted - a.accepted);
-  let html='<table><thead><tr><th>#</th><th class="left">ব্যবহারকারী</th><th>গৃহীত</th><th>অপর্যালোচিত</th><th>বাতিল</th><th>মোট শব্দ</th><th>মোট পর্যালোচিত নিবন্ধ</th></tr></thead><tbody>';
-  
-  let wikitable='{| class="wikitable sortable"\n! # !! ব্যবহারকারী !! গৃহীত !! অপর্যালোচিত !! বাতিল !! মোট শব্দ !! মোট পর্যালোচিত নিবন্ধ\n';
-  
-  let gi=1,gA=0,gU=0,gR=0,gT=0,gRev=0;
-
-  for(const r of rows){
-    html+=`<tr><td>${toBn(gi)}</td><td class="left">${escapeHtml(r.user)}</td><td>${formatBn(r.accepted)}</td><td>${formatBn(r.unreviewed)}</td><td>${formatBn(r.rejected)}</td><td>${formatBn(r.total)}</td><td>${formatBn(r.reviews)}</td></tr>`;
-    
-    wikitable+=`|-\n| ${toBn(gi)} || ${r.user} || ${toBn(r.accepted)} || ${toBn(r.unreviewed)} || ${toBn(r.rejected)} || ${toBn(r.total)} || ${toBn(r.reviews)}\n`;
-    
-    gA+=r.accepted; gU+=r.unreviewed; gR+=r.rejected; gT+=r.total; gRev+=r.reviews; gi++;
-  }
-
-  html+=`<tr class="total-row"><td></td><td class="left">মোট</td><td>${formatBn(gA)}</td><td>${formatBn(gU)}</td><td>${formatBn(gR)}</td><td>${formatBn(gT)}</td><td>${formatBn(gRev)}</td></tr></tbody></table>`;
-  wikitable+=`|-\n! মোট ||  || ${toBn(gA)} || ${toBn(gU)} || ${toBn(gR)} || ${toBn(gT)} || ${toBn(gRev)}\n|}`;
-
-  tableWrap.innerHTML=html;
-  summaryEl.textContent=`সারাংশ — মোট গৃহীত: ${formatBn(gA)} | মোট অপর্যালোচিত: ${formatBn(gU)} | মোট বাতিল: ${formatBn(gR)} | মোট শব্দ: ${formatBn(gT)} | মোট পর্যালোচনা: ${formatBn(gRev)}`;
-  currentWikitable = wikitable;
-
-  copyWikiBtn.onclick=()=>{ navigator.clipboard.writeText(currentWikitable).then(()=>{ copyWikiBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyWikiBtn.textContent='📋 উইকিটেবিল কপি করুন',1400); }); };
-}
-
-/* ---------- Jury ---------- */
-async function loadJuryStats(code){
-  countBtn.disabled=juryBtn.disabled=true;
-  showProgress();
-  try{
-    const resp=await fetch(juryEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
-    const data=await resp.json(); 
-    if(data.error) throw new Error(data.error);
-    const juries=data.raw||[];
+    const concurrency = Math.min(MAX_CONCURRENT, tasks.length||1);
+    const workers = Array.from({length:concurrency}, async ()=>{ while(true){ const t=await nextTask(); if(!t) break; await fetchOne(t); }});
+    await Promise.all(workers);
     hideProgress();
-    if(juries.length===0){ juryCard.classList.add('hidden'); return; }
-    juryCard.classList.remove('hidden');
+    renderArticleTable(totals);
+  }
 
-    juries.sort((a,b)=>b[1].total-a[1].total);
-    let html='<table><thead><tr><th>#</th><th class="left">পর্যালোচক</th><th>মোট</th><th>গৃহীত</th><th>বাতিল</th></tr></thead><tbody>';
-    let wikitable='{| class="wikitable sortable"\n! # !! পর্যালোচক !! মোট !! গৃহীত !! বাতিল\n';
-    
-    let gi=1,tTot=0,tAcc=0,tRej=0;
+  function renderArticleTable(totals) {
+    const keys = Object.keys(totals);
+    if(keys.length === 0) { resultCard.classList.add('hidden'); return; }
 
-    for(const [j,s] of juries){
-      html+=`<tr><td>${toBn(gi)}</td><td class="left">${escapeHtml(j)}</td><td>${toBn(s.total)}</td><td>${toBn(s.accepted)}</td><td>${toBn(s.rejected)}</td></tr>`;
-      wikitable+=`|-\n| ${toBn(gi)} || ${j} || ${toBn(s.total)} || ${toBn(s.accepted)} || ${toBn(s.rejected)}\n`;
-      tTot+=s.total; tAcc+=s.accepted; tRej+=s.rejected; gi++;
+    resultCard.classList.remove('hidden');
+    const rows = Object.entries(totals).map(([user,v])=>({user,...v})).sort((a,b)=>b.accepted - a.accepted);
+
+    let html = '<table><thead><tr><th>#</th><th class="left">ব্যবহারকারী</th><th>গৃহীত</th><th>অপর্যালোচিত</th><th>বাতিল</th><th>মোট শব্দ</th><th>মোট পর্যালোচিত নিবন্ধ</th></tr></thead><tbody>';
+    let wikitable = '{| class="wikitable sortable"\n! # !! ব্যবহারকারী !! গৃহীত !! অপর্যালোচিত !! বাতিল !! মোট শব্দ !! মোট পর্যালোচিত নিবন্ধ\n';
+
+    let gi=1, gA=0, gU=0, gR=0, gT=0, gRev=0;
+    for(const r of rows){
+      html += `<tr><td>${toBn(gi)}</td><td class="left">${escapeHtml(r.user)}</td><td>${formatBn(r.accepted)}</td><td>${formatBn(r.unreviewed)}</td><td>${formatBn(r.rejected)}</td><td>${formatBn(r.total)}</td><td>${formatBn(r.reviews)}</td></tr>`;
+      wikitable += `|-\n| ${toBn(gi)} || ${r.user} || ${toBn(r.accepted)} || ${toBn(r.unreviewed)} || ${toBn(r.rejected)} || ${toBn(r.total)} || ${toBn(r.reviews)}\n`;
+      gA+=r.accepted; gU+=r.unreviewed; gR+=r.rejected; gT+=r.total; gRev+=r.reviews; gi++;
     }
 
-    html+=`<tr class="total-row"><td></td><td class="left">মোট</td><td>${toBn(tTot)}</td><td>${toBn(tAcc)}</td><td>${toBn(tRej)}</td></tr></tbody></table>`;
-    wikitable+=`|-\n! মোট ||  || ${toBn(tTot)} || ${toBn(tAcc)} || ${toBn(tRej)}\n|}`;
+    html += `<tr class="total-row"><td></td><td class="left">মোট</td><td>${formatBn(gA)}</td><td>${formatBn(gU)}</td><td>${formatBn(gR)}</td><td>${formatBn(gT)}</td><td>${formatBn(gRev)}</td></tr></tbody></table>`;
+    wikitable += `|-\n! মোট ||  || ${toBn(gA)} || ${toBn(gU)} || ${toBn(gR)} || ${toBn(gT)} || ${toBn(gRev)}\n|}`;
 
-    juryParsedWrap.innerHTML=html;
-    currentJuryWikitable = wikitable;
+    tableWrap.innerHTML = html;
+    summaryEl.textContent = `সারাংশ — মোট গৃহীত: ${formatBn(gA)} | মোট অপর্যালোচিত: ${formatBn(gU)} | মোট বাতিল: ${formatBn(gR)} | মোট শব্দ: ${formatBn(gT)} | মোট পর্যালোচনা: ${formatBn(gRev)}`;
+    currentWikitable = wikitable;
 
-    copyJuryBtn.onclick=()=>{ navigator.clipboard.writeText(currentJuryWikitable).then(()=>{ copyJuryBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyJuryBtn.textContent='📋 উইকিটেবিল কপি করুন',1400); }); };
-  }catch(e){ hideProgress(); showError('ডেটা আনতে ব্যর্থ: '+e.message); }
-  finally{ countBtn.disabled=juryBtn.disabled=false; }
-}
+    copyWikiBtn.onclick = ()=>{ navigator.clipboard.writeText(currentWikitable).then(()=>{ copyWikiBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyWikiBtn.textContent='📋 উইকিটেবিল কপি করুন',1400); }); };
+  }
+
+  /* ---------- Jury Stats ---------- */
+  async function loadJuryStats(code) {
+    countBtn.disabled = juryBtn.disabled = true;
+    showProgress();
+    try{
+      const resp = await fetch(juryEndpoint, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({code})
+      });
+      const data = await resp.json();
+      if(data.error) throw new Error(data.error);
+
+      const juries = data.raw || [];
+      hideProgress();
+      if(juries.length === 0){ juryCard.classList.add('hidden'); return; }
+
+      juryCard.classList.remove('hidden');
+      juries.sort((a,b)=>b[1].total - a[1].total);
+
+      let html = '<table><thead><tr><th>#</th><th class="left">পর্যালোচক</th><th>মোট</th><th>গৃহীত</th><th>বাতিল</th></tr></thead><tbody>';
+      let wikitable = '{| class="wikitable sortable"\n! # !! পর্যালোচক !! মোট !! গৃহীত !! বাতিল\n';
+
+      let gi=1, tTot=0, tAcc=0, tRej=0;
+      for(const [j,s] of juries){
+        html += `<tr><td>${toBn(gi)}</td><td class="left">${escapeHtml(j)}</td><td>${toBn(s.total)}</td><td>${toBn(s.accepted)}</td><td>${toBn(s.rejected)}</td></tr>`;
+        wikitable += `|-\n| ${toBn(gi)} || ${j} || ${toBn(s.total)} || ${toBn(s.accepted)} || ${toBn(s.rejected)}\n`;
+        tTot+=s.total; tAcc+=s.accepted; tRej+=s.rejected; gi++;
+      }
+
+      html += `<tr class="total-row"><td></td><td class="left">মোট</td><td>${toBn(tTot)}</td><td>${toBn(tAcc)}</td><td>${toBn(tRej)}</td></tr></tbody></table>`;
+      wikitable += `|-\n! মোট ||  || ${toBn(tTot)} || ${toBn(tAcc)} || ${toBn(tRej)}\n|}`;
+
+      juryParsedWrap.innerHTML = html;
+      currentJuryWikitable = wikitable;
+
+      copyJuryBtn.onclick = ()=>{ navigator.clipboard.writeText(currentJuryWikitable).then(()=>{ copyJuryBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyJuryBtn.textContent='📋 উইকিটেবিল কপি করুন',1400); }); };
+
+    } catch(e){ hideProgress(); showError('ডেটা আনতে ব্যর্থ: '+e.message); }
+    finally { countBtn.disabled = juryBtn.disabled = false; }
+  }
+
+});
 </script>
-
-
-
-</body>
-</html>
-
-
-
-
