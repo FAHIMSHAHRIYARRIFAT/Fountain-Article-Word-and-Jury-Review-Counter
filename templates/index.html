@@ -40,12 +40,17 @@ td.left{text-align:left;padding-left:14px}
   <div class="header">
     <h1 class="title">উইকি নিবন্ধের শব্দ গণক</h1>
     <div class="controls">
-      <input id="fountainCode" type="text" placeholder="ফাউন্টেন ইউআরএল এর শেষের কোডটি লিখুন — যেমন: https://fountain.toolforge.org/editathons/voy25 এই ক্ষেত্রে কোডটি হবে voy25" aria-label="ফাউন্টেন ইউআরএল এর শেষের কোডটি লিখুন">
-      <div class="buttons">
-        <button id="countBtn" class="btn">📝 শব্দসংখ্যা গণনা করুন</button>
-        <button id="juryBtn" class="btn warn">🧐 পর্যালোচনা পরিসংখ্যান গণনা করুন</button>
-      </div>
-    </div>
+  <label for="fountainCode" class="input-label">
+    ফাউন্টেন ইউআরএল এর শেষের কোডটি লিখুন — যেমন: https://fountain.toolforge.org/editathons/voy25 এই ক্ষেত্রে কোডটি হবে voy25
+  </label>
+  <input id="fountainCode" type="text" aria-label="ফাউন্টেন ইউআরএল এর শেষের কোডটি লিখুন">
+  
+  <div class="buttons">
+    <button id="countBtn" class="btn">📝 শব্দসংখ্যা গণনা করুন</button>
+    <button id="juryBtn" class="btn warn">🧐 পর্যালোচনা পরিসংখ্যান গণনা করুন</button>
+  </div>
+</div>
+
   </div>
 
   <div id="error" class="error hidden"></div>
