@@ -168,12 +168,9 @@ async function countArticleWords(tasks, siteUrl){
         if (j.error) throw new Error('Page not found');
 
         const htmlContent = j.parse.text['*'] || '';
-
-        // Create a temporary div to manipulate HTML like countWordsFromTitle
         const tempDiv = document.createElement('div');
         tempDiv.innerHTML = htmlContent;
 
-        // Remove unwanted elements by class, tag, etc.
         const unwanted = [
             '.mw-empty-elt','.mw-editsection','.reference','.references',
             '.reflist','.mbox-small','.ambox','.navbox','.catlinks',
@@ -182,7 +179,6 @@ async function countArticleWords(tasks, siteUrl){
         ].join(',');
         tempDiv.querySelectorAll(unwanted).forEach(e => e.remove());
 
-        // Get clean text content
         const content = tempDiv.textContent || '';
         let words;
         if (siteUrl.startsWith('bn.')) {
@@ -203,7 +199,7 @@ async function countArticleWords(tasks, siteUrl){
         done++;
         setProgress(Math.round((done / tasks.length) * 100));
     }
-}
+  }
 
   const concurrency=Math.min(MAX_CONCURRENT,tasks.length||1);
   const workers=Array.from({length:concurrency},async()=>{
@@ -221,17 +217,22 @@ function renderArticleTable(totals){
   resultCard.classList.remove('hidden');
   const rows=Object.entries(totals).map(([user,v])=>({user,...v})).sort((a,b)=>b.accepted - a.accepted);
   let html='<table><thead><tr><th>#</th><th class="left">ব্যবহারকারী</th><th>গৃহীত</th><th>অপর্যালোচিত</th><th>বাতিল</th><th>মোট শব্দ</th><th>মোট পর্যালোচিত নিবন্ধ</th></tr></thead><tbody>';
-  let wikitable='{| class="wikitable sortable"\n! # !! ব্যবহারকারী !! গৃহীত !! অপর্যালোচিত !! বাতিল !! মোট !! মোট পর্যালোচিত নিবন্ধ\n';
+  
+  let wikitable='{| class="wikitable sortable"\n! # !! ব্যবহারকারী !! গৃহীত !! অপর্যালোচিত !! বাতিল !! মোট শব্দ !! মোট পর্যালোচিত নিবন্ধ\n';
+  
   let gi=1,gA=0,gU=0,gR=0,gT=0,gRev=0;
 
   for(const r of rows){
     html+=`<tr><td>${toBn(gi)}</td><td class="left">${escapeHtml(r.user)}</td><td>${formatBn(r.accepted)}</td><td>${formatBn(r.unreviewed)}</td><td>${formatBn(r.rejected)}</td><td>${formatBn(r.total)}</td><td>${formatBn(r.reviews)}</td></tr>`;
-    wikitable+=`|-\n| ${toBn(gi)} || ${r.user} || ${r.accepted} || ${r.unreviewed} || ${r.rejected} || ${r.total} || ${r.reviews}\n`;
+    
+    wikitable+=`|-\n| ${toBn(gi)} || ${r.user} || ${toBn(r.accepted)} || ${toBn(r.unreviewed)} || ${toBn(r.rejected)} || ${toBn(r.total)} || ${toBn(r.reviews)}\n`;
+    
     gA+=r.accepted; gU+=r.unreviewed; gR+=r.rejected; gT+=r.total; gRev+=r.reviews; gi++;
   }
 
   html+=`<tr class="total-row"><td></td><td class="left">মোট</td><td>${formatBn(gA)}</td><td>${formatBn(gU)}</td><td>${formatBn(gR)}</td><td>${formatBn(gT)}</td><td>${formatBn(gRev)}</td></tr></tbody></table>`;
-  wikitable+=`|-\n! মোট ||  || ${gA} || ${gU} || ${gR} || ${gT} || ${gRev}\n|}`;
+  wikitable+=`|-\n! মোট ||  || ${toBn(gA)} || ${toBn(gU)} || ${toBn(gR)} || ${toBn(gT)} || ${toBn(gRev)}\n|}`;
+
   tableWrap.innerHTML=html;
   summaryEl.textContent=`সারাংশ — মোট গৃহীত: ${formatBn(gA)} | মোট অপর্যালোচিত: ${formatBn(gU)} | মোট বাতিল: ${formatBn(gR)} | মোট শব্দ: ${formatBn(gT)} | মোট পর্যালোচনা: ${formatBn(gRev)}`;
   currentWikitable = wikitable;
@@ -255,16 +256,18 @@ async function loadJuryStats(code){
     juries.sort((a,b)=>b[1].total-a[1].total);
     let html='<table><thead><tr><th>#</th><th class="left">পর্যালোচক</th><th>মোট</th><th>গৃহীত</th><th>বাতিল</th></tr></thead><tbody>';
     let wikitable='{| class="wikitable sortable"\n! # !! পর্যালোচক !! মোট !! গৃহীত !! বাতিল\n';
+    
     let gi=1,tTot=0,tAcc=0,tRej=0;
 
     for(const [j,s] of juries){
       html+=`<tr><td>${toBn(gi)}</td><td class="left">${escapeHtml(j)}</td><td>${toBn(s.total)}</td><td>${toBn(s.accepted)}</td><td>${toBn(s.rejected)}</td></tr>`;
-      wikitable+=`|-\n| ${toBn(gi)} || ${j} || ${s.total} || ${s.accepted} || ${s.rejected}\n`;
+      wikitable+=`|-\n| ${toBn(gi)} || ${j} || ${toBn(s.total)} || ${toBn(s.accepted)} || ${toBn(s.rejected)}\n`;
       tTot+=s.total; tAcc+=s.accepted; tRej+=s.rejected; gi++;
     }
 
     html+=`<tr class="total-row"><td></td><td class="left">মোট</td><td>${toBn(tTot)}</td><td>${toBn(tAcc)}</td><td>${toBn(tRej)}</td></tr></tbody></table>`;
-    wikitable+=`|-\n! মোট ||  || ${tTot} || ${tAcc} || ${tRej}\n|}`;
+    wikitable+=`|-\n! মোট ||  || ${toBn(tTot)} || ${toBn(tAcc)} || ${toBn(tRej)}\n|}`;
+
     juryParsedWrap.innerHTML=html;
     currentJuryWikitable = wikitable;
 
@@ -273,6 +276,9 @@ async function loadJuryStats(code){
   finally{ countBtn.disabled=juryBtn.disabled=false; }
 }
 </script>
+
+
+
 </body>
 </html>
 
