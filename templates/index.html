@@ -40,10 +40,10 @@ td.left{text-align:left;padding-left:14px}
   <div class="header">
     <h1 class="title">উইকি নিবন্ধের শব্দ গণক</h1>
     <div class="controls">
-      <input id="fountainCode" type="text" placeholder="Fountain কোড লিখুন — যেমন: wrcbn2025" aria-label="Fountain কোড">
+      <input id="fountainCode" type="text" placeholder="ফাউন্টেন ইউআরএল এর শেষের কোডটি লিখুন — যেমন: https://fountain.toolforge.org/editathons/voy25 এই ক্ষেত্রে কোডটি হবে voy25" aria-label="ফাউন্টেন ইউআরএল এর শেষের কোডটি লিখুন">
       <div class="buttons">
-        <button id="countBtn" class="btn">📝 গণনা করুন</button>
-        <button id="juryBtn" class="btn warn">🧐 পর্যালোচক গণনা</button>
+        <button id="countBtn" class="btn">📝 শব্দসংখ্যা গণনা করুন</button>
+        <button id="juryBtn" class="btn warn">🧐 পর্যালোচনা পরিসংখ্যান গণনা করুন</button>
       </div>
     </div>
   </div>
@@ -55,8 +55,8 @@ td.left{text-align:left;padding-left:14px}
     <div style="display:flex;justify-content:space-between;align-items:center">
       <div class="small" id="resultTitle">ফলাফল</div>
       <div>
-        <button class="copy-btn" id="copyWikiBtn">📋 কপি ফলাফল</button>
-        <button class="copy-btn" id="copyJsonBtn">📋 কপি JSON</button>
+        <button class="copy-btn" id="copyWikiBtn">📋 উইকিটেবিল কপি করুন</button>
+        <button class="copy-btn" id="copyJsonBtn">📋 JSON কপি করুন</button>
       </div>
     </div>
     <div class="table-wrap" id="tableWrap"></div>
@@ -65,8 +65,8 @@ td.left{text-align:left;padding-left:14px}
 
   <div class="card hidden" id="juryCard">
     <div style="display:flex;justify-content:space-between;align-items:center">
-      <div class="small">জুরি টেবিল</div>
-      <button class="copy-btn" id="copyJuryBtn">📋 কপি ফলাফল</button>
+      <div class="small">পর্যালোচনা পরিসংখ্যান</div>
+      <button class="copy-btn" id="copyJuryBtn">📋 উইকিটেবিল কপি করুন</button>
     </div>
     <div class="table-wrap" id="juryParsedWrap"></div>
   </div>
@@ -118,7 +118,7 @@ async function runMode(selectedMode){
   juryParsedWrap.innerHTML='';
   currentWikitable=''; currentJuryWikitable='';
   const code = fountainInput.value.trim();
-  if(!code){ showError('দয়া করে Fountain কোড লিখুন।'); return; }
+  if(!code){ showError('দয়া করে ফাউন্টেন কোড লিখুন।'); return; }
   if(selectedMode==='word') await loadArticleWordCounts(code);
   else await loadJuryStats(code);
 }
@@ -216,8 +216,8 @@ function renderArticleTable(totals){
 
   resultCard.classList.remove('hidden');
   const rows=Object.entries(totals).map(([user,v])=>({user,...v})).sort((a,b)=>b.total-a.total);
-  let html='<table><thead><tr><th>#</th><th class="left">ব্যবহারকারী</th><th>গৃহীত শব্দ</th><th>অপর্যালোচিত শব্দ</th><th>বাতিল শব্দ</th><th>মোট শব্দ</th><th>পর্যালোচনা সংখ্যা</th></tr></thead><tbody>';
-  let wikitable='{| class="wikitable sortable"\n! # !! ব্যবহারকারী !! গৃহীত !! অপর্যালোচিত !! বাতিল !! মোট !! পর্যালোচনা\n';
+  let html='<table><thead><tr><th>#</th><th class="left">ব্যবহারকারী</th><th>গৃহীত</th><th>অপর্যালোচিত</th><th>বাতিল</th><th>মোট শব্দ</th><th>মোট পর্যালোচিত নিবন্ধ</th></tr></thead><tbody>';
+  let wikitable='{| class="wikitable sortable"\n! # !! ব্যবহারকারী !! গৃহীত !! অপর্যালোচিত !! বাতিল !! মোট !! মোট পর্যালোচিত নিবন্ধ\n';
   let gi=1,gA=0,gU=0,gR=0,gT=0,gRev=0;
 
   for(const r of rows){
@@ -232,8 +232,8 @@ function renderArticleTable(totals){
   summaryEl.textContent=`সারাংশ — মোট গৃহীত: ${formatBn(gA)} | মোট অপর্যালোচিত: ${formatBn(gU)} | মোট বাতিল: ${formatBn(gR)} | মোট শব্দ: ${formatBn(gT)} | মোট পর্যালোচনা: ${formatBn(gRev)}`;
   currentWikitable = wikitable;
 
-  copyWikiBtn.onclick=()=>{ navigator.clipboard.writeText(currentWikitable).then(()=>{ copyWikiBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyWikiBtn.textContent='📋 কপি ফলাফল',1400); }); };
-  copyJsonBtn.onclick=()=>{ navigator.clipboard.writeText(JSON.stringify(rows,null,2)).then(()=>{ copyJsonBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyJsonBtn.textContent='📋 কপি JSON',1400); }); };
+  copyWikiBtn.onclick=()=>{ navigator.clipboard.writeText(currentWikitable).then(()=>{ copyWikiBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyWikiBtn.textContent='📋 উইকিটেবিল কপি করুন',1400); }); };
+  copyJsonBtn.onclick=()=>{ navigator.clipboard.writeText(JSON.stringify(rows,null,2)).then(()=>{ copyJsonBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyJsonBtn.textContent='📋 JSON কপি করুন',1400); }); };
 }
 
 /* ---------- Jury ---------- */
@@ -265,7 +265,7 @@ async function loadJuryStats(code){
     juryParsedWrap.innerHTML=html;
     currentJuryWikitable = wikitable;
 
-    copyJuryBtn.onclick=()=>{ navigator.clipboard.writeText(currentJuryWikitable).then(()=>{ copyJuryBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyJuryBtn.textContent='📋 কপি ফলাফল',1400); }); };
+    copyJuryBtn.onclick=()=>{ navigator.clipboard.writeText(currentJuryWikitable).then(()=>{ copyJuryBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyJuryBtn.textContent='📋 উইকিটেবিল কপি করুন',1400); }); };
   }catch(e){ hideProgress(); showError('ডেটা আনতে ব্যর্থ: '+e.message); }
   finally{ countBtn.disabled=juryBtn.disabled=false; }
 }
