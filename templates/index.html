@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>উইকি নিবন্ধের শব্দ গণক</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+Bengali:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#0d1117; --card:#0f1720; --muted:#8b949e; --text:#c9d1d9;
+  --accent:#58a6ff; --success:#2ea043; --danger:#f85149; --glass:rgba(255,255,255,0.03);
+}
+body{font-family:'Noto Serif Bengali',serif;background:var(--bg);color:var(--text);margin:0;padding:28px;display:flex;justify-content:center}
+.container{width:100%;max-width:1100px}
+.header{display:flex;flex-direction: column;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.title{font-size:1.4rem;color:var(--accent);margin:0}
+.controls{display:flex;flex-direction:column;gap:8px;align-items:center;flex-wrap:wrap;}
+.controls .buttons{display:flex;flex-direction:row;gap:8px;}
+input[type="text"]{background:var(--card);border:1px solid rgba(255,255,255,0.03);padding:10px 12px;border-radius:8px;color:var(--text);min-width:240px}
+.btn{background:var(--accent);color:#041024;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-weight:700;display:flex;align-items:center;gap:6px}
+.btn.warn{background:var(--danger);color:#fff}
+.copy-btn{background:#21262d;color:var(--text);padding:6px 10px;border-radius:8px;border:1px solid rgba(255,255,255,0.03);cursor:pointer;display:flex;align-items:center;gap:6px}
+.progress-wrap{height:8px;background:rgba(255,255,255,0.03);border-radius:999px;overflow:hidden;margin:14px 0;display:none}
+.progress{height:100%;width:0%;background:var(--success);transition:width .22s}
+.card{background:linear-gradient(180deg, rgba(255,255,255,0.02), transparent);border:1px solid rgba(255,255,255,0.04);border-radius:12px;padding:14px;margin-top:12px}
+.table-wrap{overflow:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;min-width:700px}
+th,td{padding:10px 12px;text-align:center;border-bottom:1px solid rgba(255,255,255,0.03);font-size:0.95rem}
+th{color:var(--muted);font-weight:700;background:transparent}
+td.left{text-align:left;padding-left:14px}
+.total-row td{font-weight:700;color:var(--accent);border-top:1px solid rgba(255,255,255,0.04)}
+.small{font-size:0.86rem;color:var(--muted)}
+.error{color:var(--danger);margin-top:10px}
+.hidden{display:none;}
+@media(max-width:820px){table{min-width:600px}input[type="text"]{min-width:140px}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <h1 class="title">উইকি নিবন্ধের শব্দ গণক</h1>
+    <div class="controls">
+      <input id="fountainCode" type="text" placeholder="Fountain কোড লিখুন — যেমন: wrcbn2025" aria-label="Fountain কোড">
+      <div class="buttons">
+        <button id="countBtn" class="btn">📝 গণনা করুন</button>
+        <button id="juryBtn" class="btn warn">🧐 পর্যালোচক গণনা</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="error" class="error hidden"></div>
+  <div class="progress-wrap" id="progressWrap"><div class="progress" id="progressBar"></div></div>
+
+  <div class="card hidden" id="resultCard" aria-live="polite">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="small" id="resultTitle">ফলাফল</div>
+      <div>
+        <button class="copy-btn" id="copyWikiBtn">📋 কপি ফলাফল</button>
+        <button class="copy-btn" id="copyJsonBtn">📋 কপি JSON</button>
+      </div>
+    </div>
+    <div class="table-wrap" id="tableWrap"></div>
+    <div id="summary" class="small" style="margin-top:10px;text-align:right;color:var(--muted)"></div>
+  </div>
+
+  <div class="card hidden" id="juryCard">
+    <div style="display:flex;justify-content:space-between;align-items:center">
+      <div class="small">জুরি টেবিল</div>
+      <button class="copy-btn" id="copyJuryBtn">📋 কপি ফলাফল</button>
+    </div>
+    <div class="table-wrap" id="juryParsedWrap"></div>
+  </div>
+</div>
+
+<script>
+const MAX_CONCURRENT = 500;
+const fountainEndpoint = '/fetch_articles';
+const juryEndpoint = '/jury_stats';
+
+let mode = 'word';
+
+const fountainInput = document.getElementById('fountainCode');
+const countBtn = document.getElementById('countBtn');
+const juryBtn  = document.getElementById('juryBtn');
+const progressWrap = document.getElementById('progressWrap');
+const progressBar  = document.getElementById('progressBar');
+const resultCard = document.getElementById('resultCard');
+const tableWrap = document.getElementById('tableWrap');
+const summaryEl = document.getElementById('summary');
+const copyWikiBtn = document.getElementById('copyWikiBtn');
+const copyJsonBtn = document.getElementById('copyJsonBtn');
+const juryCard = document.getElementById('juryCard');
+const juryParsedWrap = document.getElementById('juryParsedWrap');
+const copyJuryBtn = document.getElementById('copyJuryBtn');
+const errorEl = document.getElementById('error');
+
+let currentWikitable = '';
+let currentJuryWikitable = '';
+
+function showError(msg){ errorEl.textContent = msg; errorEl.classList.remove('hidden'); }
+function hideError(){ errorEl.textContent = ''; errorEl.classList.add('hidden'); }
+function showProgress(){ progressWrap.style.display='block'; progressBar.style.width='0%'; }
+function hideProgress(){ progressWrap.style.display='none'; progressBar.style.width='0%'; }
+function setProgress(p){ progressBar.style.width = `${p}%`; }
+
+const toBn = n => String(n).replace(/\d/g,d=>"০১২৩৪৫৬৭৮৯"[d]);
+const formatBn = n => { try { return Number(n).toLocaleString('bn-BD'); } catch { return toBn(n); } };
+const escapeHtml = s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+
+countBtn.addEventListener('click', ()=>runMode('word'));
+juryBtn.addEventListener('click', ()=>runMode('review'));
+
+async function runMode(selectedMode){
+  hideError();
+  resultCard.classList.add('hidden');
+  juryCard.classList.add('hidden');
+  tableWrap.innerHTML=''; summaryEl.textContent='';
+  juryParsedWrap.innerHTML='';
+  currentWikitable=''; currentJuryWikitable='';
+  const code = fountainInput.value.trim();
+  if(!code){ showError('দয়া করে Fountain কোড লিখুন।'); return; }
+  if(selectedMode==='word') await loadArticleWordCounts(code);
+  else await loadJuryStats(code);
+}
+
+/* ---------- Article word count ---------- */
+async function loadArticleWordCounts(code){
+  countBtn.disabled=juryBtn.disabled=true;
+  showProgress();
+  try{
+    const resp = await fetch(fountainEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+    const body = await resp.json();
+    if(body.error) throw new Error(body.error);
+    const rawArticles = body.articles || {};
+    const siteUrl = body.site_url || 'bn.wikipedia.org';
+    const tasks = [];
+    for(const user in rawArticles){
+      const arr = rawArticles[user];
+      for(const a of arr){
+        const title = a.name || '';
+        const status = a.status || 'অসম্পূর্ণ';
+        const reviews = a.reviews || 0;
+        if(title) tasks.push({user,title,status,reviews});
+      }
+    }
+    if(tasks.length===0){ showError('কোনো নিবন্ধ পাওয়া যায়নি।'); hideProgress(); return; }
+    await countArticleWords(tasks,siteUrl);
+  }catch(e){ showError('ডেটা আনতে ব্যর্থ: '+e.message); hideProgress(); }
+  finally{ countBtn.disabled=juryBtn.disabled=false; }
+}
+
+async function countArticleWords(tasks, siteUrl){
+  const totals={};
+  for(const t of tasks) if(!totals[t.user]) totals[t.user]={accepted:0,unreviewed:0,rejected:0,total:0,reviews:0};
+  let idx=0,done=0;
+  setProgress(0); showProgress();
+
+  async function nextTask(){ if(idx>=tasks.length) return null; return tasks[idx++]; }
+  async function fetchOne(task) {
+    const url = `https://${siteUrl}/w/api.php?action=parse&page=${encodeURIComponent(task.title)}&format=json&prop=text&origin=*`;
+    try {
+        const res = await fetch(url);
+        const j = await res.json();
+        if (j.error) throw new Error('Page not found');
+
+        const htmlContent = j.parse.text['*'] || '';
+
+        // Create a temporary div to manipulate HTML like countWordsFromTitle
+        const tempDiv = document.createElement('div');
+        tempDiv.innerHTML = htmlContent;
+
+        // Remove unwanted elements by class, tag, etc.
+        const unwanted = [
+            '.mw-empty-elt','.mw-editsection','.reference','.references',
+            '.reflist','.mbox-small','.ambox','.navbox','.catlinks',
+            '.noprint','.metadata','.portal','style','script','.thumbinner',
+            '.listing-lastedit'
+        ].join(',');
+        tempDiv.querySelectorAll(unwanted).forEach(e => e.remove());
+
+        // Get clean text content
+        const content = tempDiv.textContent || '';
+        let words;
+        if (siteUrl.startsWith('bn.')) {
+            words = (content.match(/[\u0980-\u09FF]+/g) || []).length;
+        } else {
+            words = content.split(/\s+/).filter(w => w.length > 0).length;
+        }
+
+        totals[task.user].total += words;
+        if (task.status === 'গৃহীত হয়েছে') totals[task.user].accepted += words;
+        else if (task.status === 'গৃহীত হয়নি') totals[task.user].rejected += words;
+        else totals[task.user].unreviewed += words;
+        totals[task.user].reviews += (task.reviews || 0);
+
+    } catch (e) {
+        totals[task.user].reviews += (task.reviews || 0);
+    } finally {
+        done++;
+        setProgress(Math.round((done / tasks.length) * 100));
+    }
+}
+
+  const concurrency=Math.min(MAX_CONCURRENT,tasks.length||1);
+  const workers=Array.from({length:concurrency},async()=>{
+    while(true){ const t=await nextTask(); if(!t) break; await fetchOne(t); }
+  });
+  await Promise.all(workers);
+  hideProgress();
+  renderArticleTable(totals);
+}
+
+function renderArticleTable(totals){
+  const keys=Object.keys(totals);
+  if(keys.length===0){ resultCard.classList.add('hidden'); return; }
+
+  resultCard.classList.remove('hidden');
+  const rows=Object.entries(totals).map(([user,v])=>({user,...v})).sort((a,b)=>b.total-a.total);
+  let html='<table><thead><tr><th>#</th><th class="left">ব্যবহারকারী</th><th>গৃহীত শব্দ</th><th>অপর্যালোচিত শব্দ</th><th>বাতিল শব্দ</th><th>মোট শব্দ</th><th>পর্যালোচনা সংখ্যা</th></tr></thead><tbody>';
+  let wikitable='{| class="wikitable sortable"\n! # !! ব্যবহারকারী !! গৃহীত !! অপর্যালোচিত !! বাতিল !! মোট !! পর্যালোচনা\n';
+  let gi=1,gA=0,gU=0,gR=0,gT=0,gRev=0;
+
+  for(const r of rows){
+    html+=`<tr><td>${toBn(gi)}</td><td class="left">${escapeHtml(r.user)}</td><td>${formatBn(r.accepted)}</td><td>${formatBn(r.unreviewed)}</td><td>${formatBn(r.rejected)}</td><td>${formatBn(r.total)}</td><td>${formatBn(r.reviews)}</td></tr>`;
+    wikitable+=`|-\n| ${toBn(gi)} || ${r.user} || ${r.accepted} || ${r.unreviewed} || ${r.rejected} || ${r.total} || ${r.reviews}\n`;
+    gA+=r.accepted; gU+=r.unreviewed; gR+=r.rejected; gT+=r.total; gRev+=r.reviews; gi++;
+  }
+
+  html+=`<tr class="total-row"><td></td><td class="left">মোট</td><td>${formatBn(gA)}</td><td>${formatBn(gU)}</td><td>${formatBn(gR)}</td><td>${formatBn(gT)}</td><td>${formatBn(gRev)}</td></tr></tbody></table>`;
+  wikitable+=`|-\n! মোট ||  || ${gA} || ${gU} || ${gR} || ${gT} || ${gRev}\n|}`;
+  tableWrap.innerHTML=html;
+  summaryEl.textContent=`সারাংশ — মোট গৃহীত: ${formatBn(gA)} | মোট অপর্যালোচিত: ${formatBn(gU)} | মোট বাতিল: ${formatBn(gR)} | মোট শব্দ: ${formatBn(gT)} | মোট পর্যালোচনা: ${formatBn(gRev)}`;
+  currentWikitable = wikitable;
+
+  copyWikiBtn.onclick=()=>{ navigator.clipboard.writeText(currentWikitable).then(()=>{ copyWikiBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyWikiBtn.textContent='📋 কপি ফলাফল',1400); }); };
+  copyJsonBtn.onclick=()=>{ navigator.clipboard.writeText(JSON.stringify(rows,null,2)).then(()=>{ copyJsonBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyJsonBtn.textContent='📋 কপি JSON',1400); }); };
+}
+
+/* ---------- Jury ---------- */
+async function loadJuryStats(code){
+  countBtn.disabled=juryBtn.disabled=true;
+  showProgress();
+  try{
+    const resp=await fetch(juryEndpoint,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({code})});
+    const data=await resp.json(); 
+    if(data.error) throw new Error(data.error);
+    const juries=data.raw||[];
+    hideProgress();
+    if(juries.length===0){ juryCard.classList.add('hidden'); return; }
+    juryCard.classList.remove('hidden');
+
+    juries.sort((a,b)=>b[1].total-a[1].total);
+    let html='<table><thead><tr><th>#</th><th class="left">পর্যালোচক</th><th>মোট</th><th>গৃহীত</th><th>বাতিল</th></tr></thead><tbody>';
+    let wikitable='{| class="wikitable sortable"\n! # !! পর্যালোচক !! মোট !! গৃহীত !! বাতিল\n';
+    let gi=1,tTot=0,tAcc=0,tRej=0;
+
+    for(const [j,s] of juries){
+      html+=`<tr><td>${toBn(gi)}</td><td class="left">${escapeHtml(j)}</td><td>${toBn(s.total)}</td><td>${toBn(s.accepted)}</td><td>${toBn(s.rejected)}</td></tr>`;
+      wikitable+=`|-\n| ${toBn(gi)} || ${j} || ${s.total} || ${s.accepted} || ${s.rejected}\n`;
+      tTot+=s.total; tAcc+=s.accepted; tRej+=s.rejected; gi++;
+    }
+
+    html+=`<tr class="total-row"><td></td><td class="left">মোট</td><td>${toBn(tTot)}</td><td>${toBn(tAcc)}</td><td>${toBn(tRej)}</td></tr></tbody></table>`;
+    wikitable+=`|-\n! মোট ||  || ${tTot} || ${tAcc} || ${tRej}\n|}`;
+    juryParsedWrap.innerHTML=html;
+    currentJuryWikitable = wikitable;
+
+    copyJuryBtn.onclick=()=>{ navigator.clipboard.writeText(currentJuryWikitable).then(()=>{ copyJuryBtn.textContent='✓ কপি হয়েছে'; setTimeout(()=>copyJuryBtn.textContent='📋 কপি ফলাফল',1400); }); };
+  }catch(e){ hideProgress(); showError('ডেটা আনতে ব্যর্থ: '+e.message); }
+  finally{ countBtn.disabled=juryBtn.disabled=false; }
+}
+</script>
+</body>
+</html>
+
+
+
+
