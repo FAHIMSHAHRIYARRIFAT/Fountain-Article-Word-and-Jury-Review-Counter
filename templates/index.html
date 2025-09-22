@@ -175,6 +175,8 @@ input[type="text"] {
 }
 
 .table-wrap {
+  display: flex;
+  justify-content: center;
   overflow-x: auto;       /* enable horizontal scrolling */
   overflow-y: hidden;     /* hide vertical scroll */
   margin-top: 12px;
@@ -182,7 +184,6 @@ input[type="text"] {
 }
 
 table {
-  width: 100%;
   border-collapse: collapse;
   min-width: 700px;      /* ensures table doesn’t shrink too much */
   table-layout: fixed;   /* optional: keeps column widths consistent */
@@ -276,7 +277,12 @@ td.left {
   .btn, .btn.warn { min-width: 120px; max-width: 100%; }
   table { min-width: 300px; font-size: 0.9rem; }
 }
-
+@media (max-width: 850px) {
+  .table-wrap {
+    /* justify-content: unset; removes the centering */
+    justify-content: flex-start;
+  }
+}
 @media(max-width: 480px) {
   .title { font-size: 1.1rem; }
   th, td { padding: 6px 8px; font-size: 0.85rem; }
